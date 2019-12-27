@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="mappers.BoardMapper">
+	<sql id="search">
+		<if test='searchType == "t"'>
+			where title like CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test='searchType == "c"'>
+			where content like CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test='searchType == "w"'>
+			where writer like CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test='searchType == "tc"'>
+			where title like CONCAT('%', #{keyword}, '%') 
+			or content like CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test='searchType == "cw"'>
+			where content like CONCAT('%', #{keyword}, '%') 
+			or writer like CONCAT('%', #{keyword}, '%')
+		</if>
+		<if test='searchType == "tcw"'>
+			where title like CONCAT('%', #{keyword}, '%') 
+			or content like CONCAT('%', #{keyword}, '%') 
+			or writer like CONCAT('%', #{keyword}, '%')
+		</if>
+	</sql>
+	
+	<resultMap type="BoardVO" id="BoardResultMap">
+		<id property="bno" column="bno"/>
+		<result property="title" column="title"/>
+		<result property="content" column="content"/>
+		<result property="writer" column="writer"/>
+		<result property="regdate" column="regdate"/>
+		<result property="viewcnt" column="viewcnt"/>
+		<result property="viewcnt" column="viewcnt"/>
+		<result property="replycnt" column="replycnt"/>
+		<collection property="files" ofType="java.lang.String" javaType="list"> <!-- 테이블에 없는 컬럼에 해당하는 변수가 있을 때 -->
+			<result column="fullName"/> <!-- 리스트 타입이 객체가 아니라 단순 String이므로 column만 제시 -->
+		</collection>
+	</resultMap>
+	
+	<insert id="insert" parameterType="BoardVO">
+		insert into tbl_board (title, content, writer) values(#{title}, #{content}, #{writer});
+	</insert>
+	
+	<select id="listAll" resultType="BoardVO">
+		select * from tbl_board order by bno desc
+	</select>
+	
+	<delete id="delete" parameterType="int">
+		delete from tbl_board where bno=#{bno}
+	</delete>
+	
+	<update id="update" parameterType="BoardVO">
+		update tbl_board set title=#{title}, content=#{content} where bno=#{bno}
+	</update>
+	
+	<select id="selectByNo" resultType="BoardVO">
+		select * from tbl_board where bno=#{bno}
+	</select>
+	
+	<update id="updateViewCnt" parameterType="int">
+		update tbl_board set viewcnt=viewcnt+#{viewCnt} where bno=#{bno}
+	</update>
+	
+	<select id="listPage" resultType="BoardVO">
+		select * from tbl_board order by bno desc limit #{page}, #{perPage}
+	</select>
+	
+	<select id="listCri" resultType="BoardVO">
+		select * from tbl_board order by bno desc limit #{pageStart}, #{perPageNum}
+	</select>
+	
+	<select id="listCount" resultType="int">
+		select count(bno) from tbl_board
+	</select>
+	
+	<select id="listSearch" resultType="BoardVO">
+		select * from tbl_board 
+			<include refid="search"/>
+			order by bno desc limit #{pageStart}, #{perPageNum}
+	</select>
+	
+	<select id="listSearchCount" resultType="int">
+		select count(bno) from tbl_board 
+			<include refid="search"/>
+	</select>
+	
+	<update id="updateReplyCount">
+		update tbl_board set replycnt = replycnt + #{amount} where bno = #{bno}
+	</update>
+
+	<insert id="addAttach">
+		insert into tbl_attach(fullname, bno) values(#{fullname}, LAST_INSERT_ID())
+	</insert>
+	
+	<select id="selectBoardAndAttachByNo" resultMap="BoardResultMap">
+		select * from tbl_board left join tbl_attach using(bno) where bno=#{bno}
+	</select>
+	
+	<delete id="deleteAttach" parameterType="int">
+		delete from tbl_attach where bno=#{bno}
+	</delete>
+	
+	<insert id="addAttachByBno">
+		insert into tbl_attach(fullname, bno) values(#{fullname}, #{bno})
+	</insert>
+	
+	<delete id="deleteAttachByFilename">
+		delete from tbl_attach where bno=#{bno} and fullName=#{fullname}
+	</delete>
+</mapper>
