@@ -22,7 +22,13 @@ public class LoginIntercepter extends HandlerInterceptorAdapter{
 			//session영역의 Auth키에 userId 저장
 			System.out.println("로그인 완료");
 			request.getSession().setAttribute("Auth", loginId);
-			response.sendRedirect(request.getContextPath()); //home 이동
+			
+			String dest = (String) request.getSession().getAttribute("dest");
+			if(dest != null) {
+				response.sendRedirect(dest);
+			}else {
+				response.sendRedirect(request.getContextPath()); //home 이동
+			}
 		}
 		
 	}

@@ -69,8 +69,10 @@
 					</div>
 				</div><!-- box-body -->
 				<div class="box-footer">
-					<div class="btn btn-warning" id="modify">Modify</div>
-					<div class="btn btn-danger" id="remove">Remove</div>
+					<c:if test="${Auth == boardVO.writer}">
+						<div class="btn btn-warning" id="modify">Modify</div>
+						<div class="btn btn-danger" id="remove">Remove</div>
+					</c:if>
 					<div class="btn btn-primary" id="listPage">Go List</div>
 				</div><!-- box-footer -->
 			</div>
@@ -165,7 +167,7 @@
 		return year + "-" + month + "-" + day;
 	})
 	
-	/* 리스트 갱신 */
+	/* 댓글 리스트 갱신 */
 	function getPageList(page) {
 		$.ajax({
 			url: "${pageContext.request.contextPath}/replies/${boardVO.bno}/" + page,
